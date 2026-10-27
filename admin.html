@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>متابعة الطيارين | لوحة الإدارة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17231f;
+      --muted: #78827e;
+      --green: #16875d;
+      --green-dark: #116b49;
+      --green-soft: #e8f5ee;
+      --line: #e9eeeb;
+      --surface: #fff;
+      --bg: #f5f7fb;
+      font-family: "Cairo", Tahoma, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: var(--bg); color: var(--ink); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    [hidden] { display: none !important; }
+    .login-screen { display: grid; min-height: 100vh; place-items: center; padding: 20px; }
+    .login-card { width: min(100%, 410px); padding: 30px; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: 0 15px 50px #17372b0d; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .brand-mark { display: grid; width: 43px; height: 43px; place-items: center; border-radius: 14px; background: var(--green); color: #fff; font-size: 23px; font-weight: 800; }
+    .brand-name { font-size: 17px; font-weight: 800; }
+    .brand-name span { display: block; color: var(--muted); font-size: 11px; font-weight: 500; }
+    h1 { margin: 0; font-size: 21px; }
+    .intro { margin: 5px 0 20px; color: var(--muted); font-size: 12px; }
+    .field { display: grid; gap: 6px; margin-bottom: 13px; }
+    .field label { font-size: 11px; font-weight: 700; }
+    .field input, .field select, .search {
+      width: 100%; height: 42px; padding: 0 12px; border: 1px solid var(--line);
+      border-radius: 9px; outline: none; background: #fff; color: var(--ink); font-size: 12px;
+    }
+    .field input:focus, .field select:focus, .search:focus { border-color: #80c4a4; box-shadow: 0 0 0 3px #eaf6ef; }
+    .primary, .secondary {
+      display: inline-flex; min-height: 42px; align-items: center; justify-content: center;
+      gap: 7px; padding: 0 15px; border: 1px solid var(--green); border-radius: 9px;
+      background: var(--green); color: #fff; font-size: 12px; font-weight: 700;
+    }
+    .primary:hover { background: var(--green-dark); }
+    .primary:disabled { cursor: wait; opacity: .7; }
+    .secondary { border-color: var(--line); background: #fff; color: #46524d; }
+    .login-card .primary { width: 100%; margin-top: 5px; }
+    .message { margin: 12px 0 0; color: #a33b2c; font-size: 11px; line-height: 1.8; }
+    .message:empty { display: none; }
+    .muted-message { color: var(--muted); }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { position: fixed; inset: 0 0 0 auto; z-index: 20; display: flex; width: 244px; flex-direction: column; padding: 26px 18px; border-left: 1px solid var(--line); background: #fff; }
+    .sidebar .brand { padding: 0 8px 30px; }
+    .nav-label { padding: 0 11px 10px; color: #a0aaa5; font-size: 11px; font-weight: 700; }
+    .nav-link { display: flex; align-items: center; gap: 12px; margin: 3px 0; padding: 11px 13px; border-radius: 11px; color: var(--green-dark); background: var(--green-soft); font-size: 13px; font-weight: 700; }
+    .nav-icon { display: grid; width: 20px; place-items: center; font-size: 17px; }
+    .sidebar-bottom { margin-top: auto; padding: 16px 12px 0; border-top: 1px solid var(--line); }
+    .manager { display: flex; align-items: center; gap: 10px; }
+    .avatar, .driver-avatar { display: grid; flex: 0 0 38px; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: var(--green-soft); color: var(--green-dark); font-weight: 800; }
+    .manager strong, .manager small { display: block; }
+    .manager strong { font-size: 12px; }
+    .manager small { color: var(--muted); font-size: 10px; }
+    .logout { margin-right: auto; padding: 6px; border: 0; background: transparent; color: #777; font-size: 11px; }
+    main { width: calc(100% - 244px); margin-right: 244px; padding: 28px 34px 40px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 25px; }
+    .heading h1 { margin: 0 0 3px; font-size: 23px; font-weight: 800; }
+    .heading p { margin: 0; color: var(--muted); font-size: 12px; }
+    .top-actions { display: flex; align-items: center; gap: 11px; }
+    .date-chip { display: flex; min-height: 40px; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: #46524d; font-size: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .stat { min-height: 112px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; }
+    .stat-label { color: var(--muted); font-size: 12px; font-weight: 600; }
+    .stat-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 10px; background: #f0f5f2; font-size: 16px; }
+    .stat-value { display: inline-block; margin-top: 5px; font-size: 27px; font-weight: 800; line-height: 1.2; }
+    .stat-note { margin-right: 8px; color: var(--muted); font-size: 10px; }
+    .stat-note.good { color: var(--green); }
+    .create-panel { margin-bottom: 20px; }
+    .create-form { display: grid; grid-template-columns: 1.15fr 1fr 1fr auto; gap: 10px; align-items: end; padding: 16px 19px; }
+    .create-form .field { margin: 0; }
+    .create-form .field input { height: 40px; }
+    .create-hint { margin: 0; padding: 0 19px 14px; color: var(--muted); font-size: 10px; }
+    .create-message { margin: 0; padding: 0 19px 14px; color: var(--green-dark); font-size: 11px; }
+    .create-message.error { color: #a33b2c; }
+    .create-safety { margin: 0; padding: 0 19px 14px; color: var(--muted); font-size: 10px; line-height: 1.8; }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.68fr) minmax(320px, .92fr); gap: 18px; align-items: start; }
+    .panel { overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 19px; border-bottom: 1px solid var(--line); }
+    .panel-title { margin: 0; font-size: 15px; font-weight: 800; }
+    .panel-subtitle { margin: 2px 0 0; color: var(--muted); font-size: 10px; }
+    .live-label { display: flex; align-items: center; gap: 7px; color: var(--green); font-size: 10px; font-weight: 700; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #2bb67a; box-shadow: 0 0 0 4px #e8f6ee; }
+    .map-wrap { position: relative; height: 475px; background: #e9efeb; }
+    #map { width: 100%; height: 100%; z-index: 1; }
+    .map-message { position: absolute; z-index: 2; inset: 0; display: grid; place-items: center; padding: 25px; background: #e9efeb; color: #586760; text-align: center; font-size: 13px; }
+    .map-legend { position: absolute; z-index: 500; right: 14px; bottom: 14px; display: flex; gap: 15px; padding: 9px 12px; border: 1px solid #e9eeeb; border-radius: 10px; background: #fff; font-size: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+    .legend-dot.offline { background: #9aa49f; }
+    .drivers-panel { min-height: 548px; }
+    .driver-count { color: var(--muted); font-size: 10px; }
+    .filters { display: grid; grid-template-columns: minmax(0, 1fr) 120px; gap: 8px; padding: 13px 15px; border-bottom: 1px solid var(--line); }
+    .search { height: 38px; }
+    .filter-select { width: 100%; height: 38px; padding: 0 9px; border: 1px solid var(--line); border-radius: 9px; outline: none; background: #fff; color: var(--ink); font-size: 11px; }
+    .driver-list { max-height: 455px; overflow-y: auto; }
+    .driver-card { display: block; width: 100%; padding: 14px 16px; border: 0; border-bottom: 1px solid #f0f2f1; background: #fff; color: inherit; text-align: right; }
+    .driver-card:hover, .driver-card.selected { background: #f5faf7; }
+    .driver-card.selected { box-shadow: inset -3px 0 var(--green); }
+    .driver-top { display: flex; align-items: center; gap: 10px; }
+    .driver-avatar { border-radius: 12px; font-size: 13px; }
+    .driver-info { min-width: 0; flex: 1; }
+    .driver-name { display: block; font-size: 12px; font-weight: 800; }
+    .order-id { display: block; margin-top: 1px; color: var(--muted); font-size: 10px; }
+    .badge { flex: 0 0 auto; padding: 3px 8px; border-radius: 20px; font-size: 9px; font-weight: 700; }
+    .badge.online { background: #e8f5ee; color: #168256; }
+    .badge.offline { background: #f1f3f2; color: #707b75; }
+    .order-status { display: inline-flex; margin-top: 6px; padding: 2px 7px; border-radius: 20px; font-size: 9px; }
+    .order-status.delivered { background: #e8f5ee; color: #168256; }
+    .order-status.progress { background: #fff3df; color: #b47718; }
+    .order-status.waiting { background: #f1f3f2; color: #707b75; }
+    .driver-meta { display: flex; justify-content: space-between; gap: 8px; margin: 8px 0 0 48px; color: var(--muted); font-size: 9px; }
+    .driver-location { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .no-results { padding: 32px 15px; color: var(--muted); text-align: center; font-size: 12px; }
+    .notice { margin-top: 18px; padding: 12px 15px; border: 1px solid #e8eee8; border-radius: 11px; background: #f0f5f0; color: #52635a; font-size: 10px; line-height: 1.9; }
+    .notice strong { color: #344b3e; }
+    .leaflet-popup-content-wrapper { border-radius: 12px; }
+    .leaflet-popup-content { margin: 11px 14px; font-family: "Cairo", Tahoma, sans-serif; font-size: 12px; }
+    .leaflet-control-attribution { direction: ltr; }
+    @media (max-width: 1150px) { main { padding: 24px; } .content-grid { grid-template-columns: minmax(0, 1.3fr) minmax(300px, .9fr); gap: 13px; } .stats { gap: 11px; } .stat { padding: 15px; } }
+    @media (max-width: 900px) {
+      .sidebar { width: 70px; align-items: center; padding: 20px 10px; }
+      .sidebar .brand { padding: 0 0 27px; }
+      .brand-mark { width: 42px; flex: 0 0 42px; }
+      .brand-name, .nav-label, .nav-link span:not(.nav-icon), .manager > div:last-child { display: none; }
+      .nav-link { justify-content: center; width: 48px; height: 45px; padding: 0; }
+      .sidebar-bottom { width: 100%; padding: 14px 0 0; }
+      .manager { justify-content: center; }
+      .logout { display: none; }
+      main { width: calc(100% - 70px); margin-right: 70px; }
+      .content-grid { grid-template-columns: 1fr; }
+      .map-wrap { height: 390px; }
+      .drivers-panel { min-height: 0; }
+      .driver-list { max-height: 340px; }
+      .create-form { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 13px; }
+      .create-form .primary { grid-column: 1 / -1; }
+      .create-hint, .create-message, .create-safety { padding-right: 13px; padding-left: 13px; }
+    }
+    @media (max-width: 620px) {
+      .sidebar { width: 56px; padding-inline: 5px; }
+      .brand-mark { width: 38px; flex-basis: 38px; height: 38px; }
+      .nav-link { width: 42px; }
+      main { width: calc(100% - 56px); margin-right: 56px; padding: 20px 13px 28px; }
+      .topbar { align-items: flex-start; }
+      .heading h1 { font-size: 18px; }
+      .heading p { max-width: 175px; font-size: 10px; }
+      .top-actions { flex-direction: column; align-items: stretch; gap: 6px; }
+      .date-chip { justify-content: center; min-height: 34px; padding: 0 8px; font-size: 9px; white-space: nowrap; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-bottom: 14px; }
+      .stat { min-height: 99px; padding: 12px; }
+      .stat-label { font-size: 10px; }
+      .stat-icon { width: 28px; height: 28px; }
+      .stat-value { font-size: 23px; }
+      .stat-note { display: block; margin: 3px 0 0; font-size: 9px; }
+      .panel-head { padding: 13px; }
+      .panel-title { font-size: 13px; }
+      .map-wrap { height: 330px; }
+      .map-legend { right: 8px; bottom: 8px; gap: 10px; padding: 7px 9px; font-size: 9px; }
+      .filters { grid-template-columns: minmax(0, 1fr) 103px; padding: 10px; }
+      .create-form { grid-template-columns: 1fr; }
+      .create-form .primary { grid-column: auto; }
+      .notice { margin-top: 13px; }
+      .login-card { padding: 23px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <section class="login-screen" id="login-screen">
+    <form class="login-card" id="login-form">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">ط</div><div class="brand-name">طيّار<span>إدارة التوصيل</span></div></div>
+      <h1>دخول المدير</h1>
+      <p class="intro">سجّل الدخول بحساب الإدارة لمتابعة فريق التوصيل مباشرة.</p>
+      <p class="intro">اكتب البريد الإلكتروني المسجّل لحساب المدير في Firebase، وليس اسم المستخدم الخاص بالطيار.</p>
+      <p class="message" id="local-file-warning" role="alert" hidden>أنت تفتح نسخة من ملفات الجهاز؛ تسجيل الدخول قد لا يُحفظ فيها. استخدم <a href="https://tesr-a9f90.web.app/admin.html">لوحة الإدارة المنشورة</a>.</p>
+      <div class="field"><label for="email">البريد الإلكتروني</label><input id="email" name="email" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="password">كلمة المرور</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+      <button class="primary" id="login-button" type="submit">تسجيل الدخول</button>
+      <p class="message" id="login-message" role="alert"></p>
+    </form>
+  </section>
+
+  <div class="app" id="dashboard" hidden>
+    <aside class="sidebar" aria-label="القائمة الرئيسية">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">ط</div><div class="brand-name">طيّار<span>إدارة التوصيل</span></div></div>
+      <div class="nav-label">القائمة الرئيسية</div>
+      <div class="nav-link" aria-current="page"><span class="nav-icon" aria-hidden="true">▦</span><span>لوحة المتابعة</span></div>
+      <div class="sidebar-bottom">
+        <div class="manager"><div class="avatar" aria-hidden="true">م</div><div><strong id="manager-name">مدير النظام</strong><small>حساب الإدارة</small></div><button class="logout" id="logout-button" type="button">خروج</button></div>
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div class="heading"><h1>متابعة الطيارين</h1><p>مواقع الفريق وحالات الطلبات — تُحدّث تلقائيًا</p></div>
+        <div class="top-actions"><div class="date-chip"><span aria-hidden="true">◷</span><span id="current-date"></span></div></div>
+      </header>
+      <section class="panel create-panel" aria-labelledby="create-driver-title">
+        <div class="panel-head"><div><h2 class="panel-title" id="create-driver-title">إضافة طيار جديد</h2><p class="panel-subtitle">أنشئ بيانات دخوله واربط حسابه بلوحة المتابعة مباشرة</p></div></div>
+        <form class="create-form" id="create-driver-form">
+          <div class="field"><label for="new-driver-name">اسم الطيار</label><input id="new-driver-name" name="name" type="text" maxlength="80" autocomplete="off" required></div>
+          <div class="field"><label for="new-driver-username">اسم المستخدم</label><input id="new-driver-username" name="username" type="text" minlength="3" maxlength="20" pattern="[a-zA-Z0-9._\-]+" autocomplete="off" required></div>
+          <div class="field"><label for="new-driver-password">كلمة المرور</label><input id="new-driver-password" name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></div>
+          <button class="primary" id="create-driver-button" type="submit">إنشاء حساب الطيار</button>
+        </form>
+        <p class="create-hint">اسم المستخدم من 3 إلى 20 حرفًا إنجليزيًا أو رقمًا (يمكن استخدام . _ -). كلمة المرور 8 أحرف على الأقل.</p>
+        <p class="create-safety">تُنشأ الحسابات بجلسة مؤقتة منفصلة حتى يظل حساب المدير مفتوحًا. صلاحيات سجل الطيار محمية بقواعد قاعدة البيانات؛ الحصر الموثوق لإنشاء حسابات Authentication في المدير يحتاج خادمًا موثوقًا.</p>
+        <p class="create-message" id="create-driver-message" role="status"></p>
+      </section>
+      <section class="stats" aria-label="ملخص حالة التوصيل">
+        <article class="stat"><div class="stat-top"><span class="stat-label">الطيارون الذين ظهروا</span><span class="stat-icon" aria-hidden="true">♙</span></div><div><span class="stat-value" id="total-count">0</span><span class="stat-note">إجمالي الحسابات الظاهرة</span></div></article>
+        <article class="stat"><div class="stat-top"><span class="stat-label">متصلون الآن</span><span class="stat-icon" aria-hidden="true">⌖</span></div><div><span class="stat-value" id="online-count">0</span><span class="stat-note good">تطبيقهم مفتوح</span></div></article>
+        <article class="stat"><div class="stat-top"><span class="stat-label">تم تسليمها</span><span class="stat-icon" aria-hidden="true">✓</span></div><div><span class="stat-value" id="delivered-count">0</span><span class="stat-note good">طلبات مكتملة</span></div></article>
+        <article class="stat"><div class="stat-top"><span class="stat-label">طلبات قيد التوصيل</span><span class="stat-icon" aria-hidden="true">◷</span></div><div><span class="stat-value" id="pending-count">0</span><span class="stat-note">طلبات نشطة</span></div></article>
+      </section>
+      <section class="content-grid" aria-label="مواقع الطيارين والطلبات">
+        <article class="panel">
+          <div class="panel-head"><div><h2 class="panel-title">خريطة مواقع الطيارين</h2><p class="panel-subtitle">مواقع حية للطيارين المتصلين، وآخر موقع معروف للآخرين</p></div><span class="live-label"><span class="live-dot"></span>مباشر</span></div>
+          <div class="map-wrap"><div id="map" role="application" aria-label="خريطة مواقع الطيارين"></div><div class="map-message" id="map-message" hidden></div><div class="map-legend"><span class="legend-item"><span class="legend-dot"></span>موقع حديث</span><span class="legend-item"><span class="legend-dot offline"></span>آخر موقع معروف</span></div></div>
+        </article>
+        <article class="panel drivers-panel">
+          <div class="panel-head"><div><h2 class="panel-title">فريق التوصيل</h2><p class="panel-subtitle">الموقع والاتصال وحالة آخر طلب</p></div><span class="driver-count" id="visible-count">0 طيار</span></div>
+          <div class="filters"><input class="search" id="search-input" type="search" placeholder="ابحث بالاسم أو الطلب" aria-label="ابحث بالاسم أو رقم الطلب"><select class="filter-select" id="status-filter" aria-label="تصفية حسب الحالة"><option value="all">كل الحالات</option><option value="online">متصل الآن</option><option value="offline">غير متصل</option><option value="progress">قيد التوصيل</option><option value="delivered">تم التسليم</option></select></div>
+          <div class="driver-list" id="driver-list" aria-live="polite"><div class="no-results">جارٍ الاتصال بقاعدة البيانات...</div></div>
+          <p class="message" id="data-message" role="alert" style="padding:0 15px 12px"></p>
+        </article>
+      </section>
+      <aside class="notice"><strong>التتبع يحترم الخصوصية:</strong> يظهر موقع الطيار بعد تسجيل دخوله وموافقته على إذن الموقع. يتوقف تحديث الموقع عند إغلاق الصفحة أو سحب الإذن. لا يظهر موقع الطيارين لبعضهم.</aside>
+    </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    "use strict";
+
+    const loginScreen = document.getElementById("login-screen");
+    const dashboard = document.getElementById("dashboard");
+    const loginForm = document.getElementById("login-form");
+    const loginButton = document.getElementById("login-button");
+    const loginMessage = document.getElementById("login-message");
+    const dataMessage = document.getElementById("data-message");
+    const driverList = document.getElementById("driver-list");
+    const createDriverForm = document.getElementById("create-driver-form");
+    const createDriverButton = document.getElementById("create-driver-button");
+    const createDriverMessage = document.getElementById("create-driver-message");
+    const markers = new Map();
+    const drivers = new Map();
+    let map = null;
+    let stopDrivers = null;
+
+    document.getElementById("current-date").textContent = new Intl.DateTimeFormat("ar-EG", {
+      weekday: "long", day: "numeric", month: "long", year: "numeric"
+    }).format(new Date());
+
+    function showLoginMessage(message) { loginMessage.textContent = message; }
+    function explainError(error) {
+      const code = error && error.code;
+      const messages = {
+        "auth/email-already-in-use": "اسم المستخدم موجود بالفعل. اختر اسمًا آخر.",
+        "auth/weak-password": "كلمة المرور يجب أن تكون 8 أحرف على الأقل.",
+        "auth/operation-not-allowed": "تسجيل البريد وكلمة المرور غير مفعّل في Firebase Authentication.",
+        "auth/invalid-email": "تعذر إنشاء البريد الداخلي لهذا الاسم. جرّب اسم مستخدم آخر.",
+        "auth/invalid-credential": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+        "auth/invalid-login-credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+        "auth/user-not-found": "لا يوجد حساب بهذا البريد الإلكتروني.",
+        "auth/wrong-password": "كلمة المرور غير صحيحة.",
+        "auth/too-many-requests": "محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.",
+        "auth/network-request-failed": "تعذّر الاتصال. تحقق من الإنترنت وحاول مجددًا.",
+        "PERMISSION_DENIED": "تم رفض الوصول. تأكد أن UID حساب المدير مضبوط في قواعد Firebase."
+      };
+      return messages[code] || `تعذر إكمال العملية (${code || "خطأ غير معروف"}). راجع إعدادات Firebase والاتصال بالإنترنت.`;
+    }
+
+    function setCounts() {
+      const values = [...drivers.values()];
+      document.getElementById("total-count").textContent = values.length;
+      document.getElementById("online-count").textContent = values.filter(driver => driver.isOnline).length;
+      document.getElementById("delivered-count").textContent = values.filter(driver => driver.status === "delivered").length;
+      document.getElementById("pending-count").textContent = values.filter(driver => driver.status === "progress").length;
+    }
+
+    function getVisibleDrivers() {
+      const query = document.getElementById("search-input").value.trim().toLocaleLowerCase("ar");
+      const filter = document.getElementById("status-filter").value;
+      return [...drivers.entries()].map(([uid, driver]) => ({ uid, ...driver }))
+        .filter(driver => {
+          const matchesQuery = !query || String(driver.name || "").toLocaleLowerCase("ar").includes(query) || String(driver.orderId || "").toLocaleLowerCase("ar").includes(query);
+          const matchesFilter = filter === "all" ||
+            (filter === "online" && driver.isOnline) ||
+            (filter === "offline" && !driver.isOnline) ||
+            filter === driver.status;
+          return matchesQuery && matchesFilter;
+        })
+        .sort((a, b) => Number(b.isOnline) - Number(a.isOnline) || String(a.name || "").localeCompare(String(b.name || ""), "ar"));
+    }
+
+    function addText(parent, tag, className, text) {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      element.textContent = text;
+      parent.append(element);
+      return element;
+    }
+
+    function formatSeen(timestamp) {
+      if (!Number.isFinite(timestamp)) return "لم يرسل موقعًا بعد";
+      const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+      if (seconds < 60) return `آخر تحديث منذ ${seconds} ث`;
+      if (seconds < 3600) return `آخر تحديث منذ ${Math.floor(seconds / 60)} د`;
+      return `آخر تحديث منذ ${Math.floor(seconds / 3600)} س`;
+    }
+
+    function updateMarker(uid, driver) {
+      if (!map || !Number.isFinite(driver.lat) || !Number.isFinite(driver.lng)) return;
+      let marker = markers.get(uid);
+      if (!marker) {
+        marker = L.circleMarker([driver.lat, driver.lng], { radius: 9, color: "#fff", weight: 3, fillOpacity: 1 }).addTo(map);
+        marker.on("click", () => selectDriver(uid));
+        markers.set(uid, marker);
+      } else {
+        marker.setLatLng([driver.lat, driver.lng]);
+      }
+      const color = driver.isLocationFresh ? "#16875d" : "#9aa49f";
+      marker.setStyle({ fillColor: color });
+      marker.unbindPopup();
+      const popup = document.createElement("div");
+      addText(popup, "strong", "", driver.name || "طيار");
+      addText(popup, "div", "", driver.orderId ? `الطلب: ${driver.orderId}` : "لا يوجد رقم طلب");
+      addText(popup, "div", "", driver.statusLabel || "متاح");
+      addText(popup, "div", "", formatSeen(driver.locationUpdatedAt));
+      marker.bindPopup(popup);
+    }
+
+    function renderDrivers() {
+      const visible = getVisibleDrivers();
+      document.getElementById("visible-count").textContent = `${visible.length} طيار`;
+      driverList.replaceChildren();
+      if (!visible.length) {
+        addText(driverList, "div", "no-results", drivers.size ? "لا توجد نتائج مطابقة." : "لم يسجل أي طيار دخولًا بعد.");
+        return;
+      }
+      visible.forEach(driver => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "driver-card";
+        card.dataset.uid = driver.uid;
+        const top = document.createElement("span");
+        top.className = "driver-top";
+        const avatar = addText(top, "span", "driver-avatar", (driver.name || "ط").trim().slice(0, 2));
+        avatar.setAttribute("aria-hidden", "true");
+        const info = document.createElement("span");
+        info.className = "driver-info";
+        addText(info, "span", "driver-name", driver.name || "طيار");
+        addText(info, "span", "order-id", [driver.username && `@${driver.username}`, driver.orderId && `طلب ${driver.orderId}`].filter(Boolean).join(" · ") || "لا يوجد طلب مسجل");
+        const orderStatus = addText(info, "span", `order-status ${driver.status || "waiting"}`, driver.statusLabel || "لم يبدأ");
+        orderStatus.setAttribute("aria-label", "حالة الطلب");
+        top.append(info);
+        const online = addText(top, "span", `badge ${driver.isOnline ? "online" : "offline"}`, driver.isOnline ? "متصل الآن" : "غير متصل");
+        online.setAttribute("aria-label", "حالة الاتصال");
+        card.append(top);
+        const meta = document.createElement("span");
+        meta.className = "driver-meta";
+        addText(meta, "span", "driver-location", Number.isFinite(driver.lat) && Number.isFinite(driver.lng) ? `⌖ ${driver.lat.toFixed(5)}, ${driver.lng.toFixed(5)}` : "⌖ الموقع غير متاح");
+        addText(meta, "span", "", formatSeen(driver.locationUpdatedAt));
+        card.append(meta);
+        card.addEventListener("click", () => selectDriver(driver.uid));
+        driverList.append(card);
+      });
+    }
+
+    function selectDriver(uid) {
+      const driver = drivers.get(uid);
+      if (!driver || !map || !Number.isFinite(driver.lat) || !Number.isFinite(driver.lng)) return;
+      map.flyTo([driver.lat, driver.lng], 15, { duration: .5 });
+      const marker = markers.get(uid);
+      if (marker) marker.openPopup();
+    }
+
+    function displayMapError() {
+      document.getElementById("map-message").hidden = false;
+      document.getElementById("map-message").textContent = "تعذّر تحميل مكتبة الخريطة. تحقق من اتصال الإنترنت وأعد تحميل الصفحة.";
+    }
+
+    function startDashboard(user) {
+      loginScreen.hidden = true;
+      dashboard.hidden = false;
+      const name = user.displayName || user.email || "مدير النظام";
+      document.getElementById("manager-name").textContent = name;
+      const managerAvatar = document.querySelector(".manager .avatar");
+      managerAvatar.textContent = [...name][0] || "م";
+      if (window.L && !map) {
+        map = L.map("map", { scrollWheelZoom: false }).setView([30.045, 31.275], 11);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+        window.setTimeout(() => map.invalidateSize(), 100);
+      } else if (!window.L) {
+        displayMapError();
+      }
+      dataMessage.textContent = "";
+      const driversRef = firebase.database().ref("drivers");
+      const onDriversChanged = snapshot => {
+        drivers.clear();
+        markers.forEach(marker => marker.remove());
+        markers.clear();
+        snapshot.forEach(child => {
+          const driver = child.val();
+          if (!driver || typeof driver !== "object") return;
+          driver.isOnline = driver.online === true && Number.isFinite(driver.updatedAt) && Date.now() - driver.updatedAt < 60000;
+          driver.isLocationFresh = Number.isFinite(driver.locationUpdatedAt) && Date.now() - driver.locationUpdatedAt < 120000;
+          driver.statusLabel = driver.status === "delivered" ? "تم التسليم" : driver.status === "progress" ? "قيد التوصيل" : "لم يبدأ";
+          drivers.set(child.key, driver);
+          updateMarker(child.key, driver);
+        });
+        setCounts();
+        renderDrivers();
+      };
+      const onDriversError = error => {
+        dataMessage.textContent = explainError(error);
+      };
+      driversRef.on("value", onDriversChanged, onDriversError);
+      stopDrivers = () => driversRef.off("value", onDriversChanged);
+    }
+
+    function stopDashboard() {
+      if (stopDrivers) {
+        stopDrivers();
+        stopDrivers = null;
+      }
+      drivers.clear();
+      markers.forEach(marker => marker.remove());
+      markers.clear();
+      setCounts();
+      renderDrivers();
+      dashboard.hidden = true;
+      loginScreen.hidden = false;
+    }
+
+    loginForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      loginButton.disabled = true;
+      loginButton.textContent = "جارٍ التحقق...";
+      showLoginMessage("");
+      const slowLoginNotice = window.setTimeout(() => {
+        showLoginMessage("التحقق ما زال جاريًا. تأكد من الإنترنت وانتظر ظهور نتيجة الدخول؛ لا ترسل كلمة المرور لأي شخص.");
+      }, 15000);
+      try {
+        await firebase.auth().signInWithEmailAndPassword(loginForm.elements.email.value.trim(), loginForm.elements.password.value);
+      } catch (error) {
+        showLoginMessage(explainError(error));
+      } finally {
+        window.clearTimeout(slowLoginNotice);
+        loginButton.disabled = false;
+        loginButton.textContent = "تسجيل الدخول";
+      }
+    });
+
+    document.getElementById("logout-button").addEventListener("click", async () => {
+      try {
+        if (stopDrivers) stopDrivers();
+        stopDrivers = null;
+        await firebase.auth().signOut();
+      } catch (error) {
+        dataMessage.textContent = explainError(error);
+      }
+    });
+
+    createDriverForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const name = createDriverForm.elements.name.value.trim();
+      const username = createDriverForm.elements.username.value.trim().toLowerCase();
+      const password = createDriverForm.elements.password.value;
+      if (!/^[a-z0-9][a-z0-9._-]{2,19}$/.test(username)) {
+        createDriverMessage.classList.add("error");
+        createDriverMessage.textContent = "اسم المستخدم يجب أن يكون من 3 إلى 20 حرفًا إنجليزيًا أو رقمًا.";
+        return;
+      }
+      if (!name || password.length < 8) {
+        createDriverMessage.classList.add("error");
+        createDriverMessage.textContent = "اكتب اسم الطيار وكلمة مرور من 8 أحرف على الأقل.";
+        return;
+      }
+      createDriverMessage.classList.remove("error");
+      createDriverMessage.textContent = "";
+      createDriverButton.disabled = true;
+      let provisionerAuth = null;
+      let createdUser = null;
+      try {
+        const admin = firebase.auth().currentUser;
+        if (!admin || admin.uid !== firebaseConfig.adminUid) {
+          throw Object.assign(new Error("Admin session required"), { code: "PERMISSION_DENIED" });
+        }
+        const duplicate = await firebase.database().ref("drivers").orderByChild("username").equalTo(username).once("value");
+        if (duplicate.exists()) {
+          throw Object.assign(new Error("Username already exists"), { code: "auth/email-already-in-use" });
+        }
+
+        const appName = "driverAccountProvisioner";
+        let provisionerApp = firebase.apps.find(app => app.name === appName);
+        if (!provisionerApp) provisionerApp = firebase.initializeApp(firebaseConfig, appName);
+        provisionerAuth = provisionerApp.auth();
+        await provisionerAuth.setPersistence(firebase.auth.Auth.Persistence.NONE);
+        const email = `${username}@drivers.${firebaseConfig.projectId}.firebaseapp.com`;
+        const credential = await provisionerAuth.createUserWithEmailAndPassword(email, password);
+        createdUser = credential.user;
+        await firebase.database().ref(`drivers/${createdUser.uid}`).set({
+          name,
+          username,
+          orderId: "",
+          status: "waiting",
+          online: false,
+          updatedAt: Date.now(),
+          createdAt: Date.now()
+        });
+        createDriverMessage.textContent = `تم إنشاء حساب ${name} بنجاح. اسم الدخول: ${username}`;
+        createDriverForm.reset();
+      } catch (error) {
+        createDriverMessage.classList.add("error");
+        if (createdUser) {
+          try {
+            await createdUser.delete();
+          } catch (cleanupError) {
+            createDriverMessage.textContent = `فشل حفظ سجل الطيار، ولم يمكن حذف حساب الدخول تلقائيًا (${cleanupError.code || cleanupError.message}). لا تستخدم الحساب حتى يراجعه المدير.`;
+            return;
+          }
+        }
+        createDriverMessage.textContent = explainError(error);
+      } finally {
+        if (provisionerAuth && provisionerAuth.currentUser) {
+          try {
+            await provisionerAuth.signOut();
+          } catch (error) {
+            createDriverMessage.classList.add("error");
+            createDriverMessage.textContent = `تعذر إنهاء جلسة إنشاء الحساب (${error.code || error.message}). أعد تحميل لوحة المدير بعد التأكد من حفظ الحساب.`;
+          }
+        }
+        createDriverButton.disabled = false;
+      }
+    });
+
+    document.getElementById("search-input").addEventListener("input", renderDrivers);
+    document.getElementById("status-filter").addEventListener("change", renderDrivers);
+    window.setInterval(() => {
+      for (const [uid, driver] of drivers) {
+        const current = driver.online === true && Number.isFinite(driver.updatedAt) && Date.now() - driver.updatedAt < 60000;
+        const freshLocation = Number.isFinite(driver.locationUpdatedAt) && Date.now() - driver.locationUpdatedAt < 120000;
+        if (current !== driver.isOnline || freshLocation !== driver.isLocationFresh) {
+          driver.isOnline = current;
+          driver.isLocationFresh = freshLocation;
+          updateMarker(uid, driver);
+        }
+      }
+      setCounts();
+      renderDrivers();
+    }, 15000);
+
+    if (!window.firebase || !window.firebaseConfig || !firebaseConfig.databaseURL) {
+      loginButton.disabled = true;
+      showLoginMessage("استكمل الإعداد: أضف databaseURL من إعدادات Realtime Database ثم أعد تحميل الصفحة.");
+    } else if (window.location.protocol === "file:") {
+      loginButton.disabled = true;
+      document.getElementById("local-file-warning").hidden = false;
+    } else {
+      try {
+        firebase.initializeApp(firebaseConfig);
+        loginButton.disabled = true;
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+          loginButton.disabled = false;
+          firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+              loginMessage.textContent = "";
+              if (user.uid === firebaseConfig.adminUid) {
+                startDashboard(user);
+              } else {
+                showLoginMessage(`الحساب ${user.email || ""} ليس حساب المدير المصرّح به، لذلك لن تُفتح اللوحة. سجّل الدخول بحساب المدير الصحيح. UID المطلوب: ${firebaseConfig.adminUid}`);
+              }
+            } else {
+              stopDashboard();
+            }
+          });
+        }).catch(error => {
+          loginButton.disabled = true;
+          showLoginMessage(`تعذر حفظ جلسة المدير في هذا المتصفح (${error.code || error.message}). افتح الموقع من HTTPS وتحقق من إعدادات ملفات الارتباط.`);
+        });
+      } catch (error) {
+        loginButton.disabled = true;
+        showLoginMessage(explainError(error));
+      }
+    }
+  </script>
+</body>
+</html>
