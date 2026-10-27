@@ -67,9 +67,11 @@
         <p class="intro">استخدم اسم المستخدم وكلمة المرور اللذين أعطاهما لك المدير.</p>
         <p class="message" id="local-file-warning" role="alert" hidden>أنت تفتح نسخة من ملفات الجهاز؛ تسجيل الدخول قد لا يعمل أو لا يُحفظ. استخدم <a href="https://tesr-a9f90.web.app/driver.html">صفحة الطيار المنشورة</a>.</p>
         <div class="field">
-          <label for="username">اسم المستخدم أو البريد الإلكتروني</label>
-          <input id="username" name="username" type="text" autocomplete="username" required>
-          <small class="field-hint">اكتب اسم المستخدم الذي أعطاه لك المدير، أو البريد الإلكتروني المسجل به الحساب في Firebase Authentication.</small>
+          <label for="username">اختر اسم الطيار</label>
+          <select id="username" name="username" autocomplete="username" required disabled>
+            <option value="">جارٍ تحميل قائمة الطيارين...</option>
+          </select>
+          <small class="field-hint">اختر اسمك من القائمة، ثم اكتب كلمة المرور التي أعطاها لك المدير.</small>
         </div>
         <div class="field"><label for="password">كلمة المرور</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
         <button class="primary" id="login-button" type="submit">تسجيل الدخول</button>
@@ -113,6 +115,7 @@
     let activeUser = null;
     let driverAuth = null;
     let driverDatabase = null;
+    let driverTimestamp = null;
     let driverRef = null;
     let connectedRef = null;
     let connectedCallback = null;
@@ -122,6 +125,63 @@
     let connected = false;
     let updateInProgress = false;
     let workStarted = false;
+
+    async function loadDriverDirectory() {
+      const usernameSelect = loginForm.elements.username;
+      usernameSelect.disabled = true;
+      loginButton.disabled = true;
+      loginMessage.textContent = "";
+      let timeoutId;
+      try {
+        const snapshot = await Promise.race([
+          driverDatabase.ref("driverDirectory").once("value"),
+          new Promise((_, reject) => {
+            timeoutId = window.setTimeout(
+              () => reject({ code: "database/timeout" }),
+              15000
+            );
+          })
+        ]);
+        const entries = [];
+        snapshot.forEach(child => {
+          const driver = child.val();
+          if (driver && typeof driver.name === "string" && driver.name.trim() &&
+              typeof driver.username === "string" && /^[a-z0-9][a-z0-9._-]{2,19}$/.test(driver.username)) {
+            entries.push({ name: driver.name.trim(), username: driver.username });
+          }
+        });
+        entries.sort((left, right) => left.name.localeCompare(right.name, "ar"));
+        usernameSelect.replaceChildren();
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = entries.length ? "اختر اسم الطيار" : "لا توجد حسابات طيارين";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        usernameSelect.append(placeholder);
+        entries.forEach(entry => {
+          const option = document.createElement("option");
+          option.value = entry.username;
+          option.textContent = entry.name;
+          usernameSelect.append(option);
+        });
+        usernameSelect.disabled = entries.length === 0;
+        loginButton.disabled = entries.length === 0;
+        if (!entries.length) {
+          loginMessage.textContent = "لا توجد أسماء طيارين متاحة. اطلب من المدير فتح لوحة الإدارة مرة واحدة لمزامنة القائمة.";
+        }
+      } catch (error) {
+        usernameSelect.replaceChildren();
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "تعذر تحميل قائمة الطيارين";
+        option.disabled = true;
+        option.selected = true;
+        usernameSelect.append(option);
+        loginMessage.textContent = `تعذر تحميل أسماء الطيارين (${error.code || error.message}). تحقق من اتصال الإنترنت وقواعد Firebase.`;
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    }
 
     function showAuthError(error) {
       const messages = {
@@ -154,8 +214,8 @@
         lat: coords.latitude,
         lng: coords.longitude,
         accuracy: coords.accuracy,
-        locationUpdatedAt: driverDatabase.ServerValue.TIMESTAMP,
-        updatedAt: driverDatabase.ServerValue.TIMESTAMP,
+        locationUpdatedAt: driverTimestamp,
+        updatedAt: driverTimestamp,
         online: true
       }).then(() => {
         locationMessage.textContent = `موقعك محدث. دقة الموقع التقريبية ${Math.round(coords.accuracy)} متر.`;
@@ -247,7 +307,7 @@
             orderId: profile.orderId,
             status: profile.status,
             online: true,
-            updatedAt: driverDatabase.ServerValue.TIMESTAMP
+            updatedAt: driverTimestamp
           });
           setOnlineDisplay(true, "جارٍ الحصول على إذن الموقع... اترك الصفحة مفتوحة أثناء العمل.");
         } catch (error) {
@@ -273,7 +333,7 @@
         if (!connected || !driverRef) return;
         const update = {
           online: true,
-          updatedAt: driverDatabase.ServerValue.TIMESTAMP
+          updatedAt: driverTimestamp
         };
         driverRef.update(update).catch(error => {
           trackingMessage.textContent = `تعذر تحديث حالة الاتصال: ${error.message || error.code}.`;
@@ -284,16 +344,12 @@
 
     loginForm.addEventListener("submit", async event => {
       event.preventDefault();
-      const username = loginForm.elements.username.value.trim().toLowerCase();
-      const email = username.includes("@")
-        ? username
-        : /^[a-z0-9][a-z0-9._-]{2,19}$/.test(username)
-          ? `${username}@drivers.${firebaseConfig.projectId}.firebaseapp.com`
-          : null;
-      if (!email) {
-        loginMessage.textContent = "اكتب اسم مستخدم صحيحًا (3–20 حرفًا إنجليزيًا أو رقمًا) أو بريدًا إلكترونيًا.";
+      const username = loginForm.elements.username.value;
+      if (!username) {
+        loginMessage.textContent = "اختر اسم الطيار من القائمة.";
         return;
       }
+      const email = `${username}@drivers.${firebaseConfig.projectId}.firebaseapp.com`;
       loginButton.disabled = true;
       loginButton.textContent = "جارٍ التحقق...";
       loginMessage.textContent = "";
@@ -322,7 +378,7 @@
       profile.orderId = document.getElementById("active-order").value.trim();
       profile.status = profile.orderId ? "progress" : "waiting";
       try {
-        await driverRef.update({ name: profile.name, orderId: profile.orderId, status: profile.status, updatedAt: driverDatabase.ServerValue.TIMESTAMP });
+        await driverRef.update({ name: profile.name, orderId: profile.orderId, status: profile.status, updatedAt: driverTimestamp });
         document.getElementById("order-message").textContent = profile.orderId ? "تم تحديث الطلب وبدء التوصيل." : "تم تسجيلك كمتاح دون طلب.";
       } catch (error) {
         document.getElementById("order-message").textContent = `تعذر تحديث الطلب: ${error.message || error.code}.`;
@@ -335,7 +391,7 @@
         return;
       }
       try {
-        await driverRef.update({ status: "delivered", updatedAt: driverDatabase.ServerValue.TIMESTAMP });
+        await driverRef.update({ status: "delivered", updatedAt: driverTimestamp });
         profile.status = "delivered";
         document.getElementById("order-message").textContent = `تم تسجيل تسليم الطلب ${profile.orderId}.`;
       } catch (error) {
@@ -355,7 +411,7 @@
       if (driverRef) {
         try {
           await driverRef.child("online").onDisconnect().cancel();
-          await driverRef.update({ online: false, updatedAt: driverDatabase.ServerValue.TIMESTAMP });
+          await driverRef.update({ online: false, updatedAt: driverTimestamp });
         } catch (error) {
           trackingMessage.textContent = `تعذر تسجيل الخروج من حالة الاتصال: ${error.message || error.code}.`;
         }
@@ -392,6 +448,7 @@
           || firebase.initializeApp(firebaseConfig, appName);
         driverAuth = app.auth();
         driverDatabase = app.database();
+        driverTimestamp = firebase.database.ServerValue.TIMESTAMP;
         loginButton.disabled = true;
         driverAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
           loginButton.disabled = false;
@@ -403,6 +460,7 @@
               loginForm.hidden = false;
             }
           });
+          loadDriverDirectory();
         }).catch(error => {
           loginMessage.textContent = `تعذر حفظ جلسة الدخول (${error.code || error.message}). افتح الموقع من HTTPS وتحقق من إعدادات ملفات الارتباط.`;
         });
