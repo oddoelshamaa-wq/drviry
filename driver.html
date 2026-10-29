@@ -1,474 +1,557 @@
-      <!doctype html>
-      <html lang="ar" dir="rtl">
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#f5f7fb">
-        <title>دخول الطيار | طيّار</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <style>
-          :root { color-scheme: light; --ink: #17231f; --muted: #78827e; --green: #16875d; --green-dark: #116b49; --line: #e9eeeb; --bg: #f5f7fb; font-family: "Cairo", Tahoma, sans-serif; }
-          * { box-sizing: border-box; }
-          body { min-width: 320px; min-height: 100vh; margin: 0; background: var(--bg); color: var(--ink); }
-          button, input, select { font: inherit; }
-          button { cursor: pointer; }
-          [hidden] { display: none !important; }
-          .page { display: grid; min-height: 100vh; place-items: center; padding: 18px; }
-          .card { width: min(100%, 450px); padding: 27px; border: 1px solid var(--line); border-radius: 17px; background: #fff; box-shadow: 0 15px 50px #17372b0d; }
-          .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
-          .brand-mark { display: grid; width: 43px; height: 43px; place-items: center; border-radius: 14px; background: var(--green); color: #fff; font-size: 23px; font-weight: 800; }
-          .brand-name { font-size: 17px; font-weight: 800; }
-          .brand-name span { display: block; color: var(--muted); font-size: 11px; font-weight: 500; }
-          h1 { margin: 0; font-size: 21px; }
-          .intro { margin: 5px 0 19px; color: var(--muted); font-size: 12px; line-height: 1.8; }
-          .field { display: grid; gap: 6px; margin-bottom: 12px; }
-          .field label { font-size: 11px; font-weight: 700; }
-          .field-hint { color: var(--muted); font-size: 10px; line-height: 1.7; }
-          .field-hint code { direction: ltr; display: inline-block; color: #53625a; }
-          .field input, .field select { width: 100%; height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; outline: none; background: #fff; color: var(--ink); font-size: 12px; }
-          .field input:focus, .field select:focus { border-color: #80c4a4; box-shadow: 0 0 0 3px #eaf6ef; }
-          .primary, .secondary { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 7px; padding: 0 15px; border: 1px solid var(--green); border-radius: 9px; background: var(--green); color: #fff; font-size: 12px; font-weight: 700; }
-          .primary:hover { background: var(--green-dark); }
-          .primary:disabled { cursor: wait; opacity: .7; }
-          .secondary { border-color: var(--line); background: #fff; color: #46524d; }
-          .form .primary, .start-work { width: 100%; margin-top: 5px; }
-          .message { margin: 12px 0 0; color: #a33b2c; font-size: 11px; line-height: 1.8; }
-          .message:empty { display: none; }
-          .info { margin: 13px 0 0; padding: 10px 12px; border-radius: 9px; background: #f0f5f0; color: #52635a; font-size: 10px; line-height: 1.8; }
-          .status-card { display: flex; align-items: center; gap: 11px; margin: 17px 0; padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: #fbfcfb; }
-          .dot { width: 10px; height: 10px; flex: 0 0 10px; border-radius: 50%; background: #aaa; }
-          .dot.online { background: #2bb67a; box-shadow: 0 0 0 4px #e8f6ee; }
-          .status-copy strong, .status-copy small { display: block; }
-          .status-copy strong { font-size: 12px; }
-          .status-copy small { color: var(--muted); font-size: 10px; }
-          .location { padding: 13px; border-radius: 11px; background: #f7faf8; color: #53625a; font-size: 11px; line-height: 1.8; }
-          .order-section { margin: 18px 0; padding-top: 17px; border-top: 1px solid var(--line); }
-          .button-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
-          .button-row .secondary { width: 100%; }
-          .foot { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
-          .foot span { color: var(--muted); font-size: 10px; }
-          .danger { padding: 6px; border: 0; background: transparent; color: #a33b2c; font-size: 11px; }
-          @media (max-width: 450px) {
-            .page { min-height: 100vh; min-height: 100svh; align-items: start; padding: 12px; }
-            .card { width: 100%; margin: auto 0; padding: 21px; }
-            .button-row { grid-template-columns: 1fr; }
-            .field input, .field select { font-size: 16px; }
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16875d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="طيار">
+  <title>دخول الطيار | طيّار</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light; --ink: #17231f; --muted: #78827e; --green: #16875d; --green-dark: #116b49; --line: #e9eeeb; --bg: #f5f7fb; font-family: "Cairo", Tahoma, sans-serif; }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; min-height: 100vh; margin: 0; background: var(--bg); color: var(--ink); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    [hidden] { display: none !important; }
+    .page { display: grid; min-height: 100vh; place-items: center; padding: 18px; }
+    .card { width: min(100%, 450px); padding: 27px; border: 1px solid var(--line); border-radius: 17px; background: #fff; box-shadow: 0 15px 50px #17372b0d; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+    .brand-mark { display: grid; width: 43px; height: 43px; place-items: center; border-radius: 14px; background: var(--green); color: #fff; font-size: 23px; font-weight: 800; }
+    .brand-name { font-size: 17px; font-weight: 800; }
+    .brand-name span { display: block; color: var(--muted); font-size: 11px; font-weight: 500; }
+    h1 { margin: 0; font-size: 21px; }
+    .intro { margin: 5px 0 19px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+    .field { display: grid; gap: 6px; margin-bottom: 12px; }
+    .field label { font-size: 11px; font-weight: 700; }
+    .field-hint { color: var(--muted); font-size: 10px; line-height: 1.7; }
+    .field input, .field select { width: 100%; height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; outline: none; background: #fff; color: var(--ink); font-size: 12px; }
+    .field input:focus, .field select:focus { border-color: #80c4a4; box-shadow: 0 0 0 3px #eaf6ef; }
+    .primary, .secondary { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 7px; padding: 0 15px; border: 1px solid var(--green); border-radius: 9px; background: var(--green); color: #fff; font-size: 12px; font-weight: 700; }
+    .primary:hover { background: var(--green-dark); }
+    .primary:disabled { cursor: wait; opacity: .7; }
+    .secondary { border-color: var(--line); background: #fff; color: #46524d; }
+    .form .primary, .start-work { width: 100%; margin-top: 5px; }
+    .message { margin: 12px 0 0; color: #a33b2c; font-size: 11px; line-height: 1.8; }
+    .message:empty { display: none; }
+    .info { margin: 13px 0 0; padding: 10px 12px; border-radius: 9px; background: #f0f5f0; color: #52635a; font-size: 10px; line-height: 1.8; }
+    .status-card { display: flex; align-items: center; gap: 11px; margin: 17px 0; padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: #fbfcfb; }
+    .dot { width: 10px; height: 10px; flex: 0 0 10px; border-radius: 50%; background: #aaa; }
+    .dot.online { background: #2bb67a; box-shadow: 0 0 0 4px #e8f6ee; }
+    .status-copy strong, .status-copy small { display: block; }
+    .status-copy strong { font-size: 12px; }
+    .status-copy small { color: var(--muted); font-size: 10px; }
+    .location { padding: 13px; border-radius: 11px; background: #f7faf8; color: #53625a; font-size: 11px; line-height: 1.8; }
+    .order-section { margin: 18px 0; padding-top: 17px; border-top: 1px solid var(--line); }
+    .button-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .button-row .secondary { width: 100%; }
+    .foot { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .foot span { color: var(--muted); font-size: 10px; }
+    .danger { padding: 6px; border: 0; background: transparent; color: #a33b2c; font-size: 11px; }
+    @media (max-width: 450px) {
+      .page { min-height: 100vh; min-height: 100svh; align-items: start; padding: 12px; }
+      .card { width: 100%; margin: auto 0; padding: 21px; }
+      .button-row { grid-template-columns: 1fr; }
+      .field input, .field select { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="card">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">ط</div><div class="brand-name">طيّار<span>تطبيق فريق التوصيل</span></div></div>
+      <form class="form" id="login-form">
+        <h1>دخول الطيار</h1>
+        <p class="intro">استخدم اسم المستخدم وكلمة المرور اللذين أعطاهما لك المدير.</p>
+        <p class="message" id="local-file-warning" role="alert" hidden>أنت تفتح نسخة من ملفات الجهاز؛ استخدم صفحة الطيار المنشورة عبر HTTPS.</p>
+        <div class="field">
+          <label for="username">اختر اسم الطيار</label>
+          <select id="username" name="username" autocomplete="username" required disabled>
+            <option value="">جارٍ تحميل قائمة الطيارين...</option>
+          </select>
+          <small class="field-hint">اختر اسمك من القائمة، ثم اكتب كلمة المرور.</small>
+        </div>
+        <div class="field"><label for="password">كلمة المرور</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+        <button class="primary" id="login-button" type="submit">تسجيل الدخول</button>
+        <button class="secondary" id="install-app-button" type="button" hidden style="width:100%;margin-top:10px">تثبيت تطبيق الطيار على الهاتف</button>
+        <p class="message" id="login-message" role="alert"></p>
+        <p class="info">يبدأ مشاركة موقعك تلقائيًا بعد تسجيل الدخول وبدء العمل. يراه المدير فقط.</p>
+      </form>
+
+      <section id="tracking-screen" hidden>
+        <h1 id="welcome">مرحبًا</h1>
+        <p class="intro">يُشارك موقعك مع المدير أثناء ساعات العمل.</p>
+        <div class="status-card"><span class="dot" id="online-dot"></span><span class="status-copy"><strong id="online-label">جارٍ الاتصال...</strong><small id="connection-detail">لا تغلق هذه الصفحة أثناء العمل.</small></span></div>
+        <button class="primary start-work" id="start-work" type="button" hidden>بدء العمل ومشاركة موقعي</button>
+        <p class="message" id="work-message" role="status"></p>
+        <div class="location" id="location-message" aria-live="polite">بانتظار الموقع...</div>
+        <div class="order-section">
+          <div class="field"><label for="active-order">رقم الطلب</label><input id="active-order" type="text" maxlength="80" autocomplete="off"></div>
+          <div class="button-row">
+            <button class="secondary" id="start-order" type="button">بدء / تحديث الطلب</button>
+            <button class="secondary" id="finish-order" type="button">تم تسليم الطلب</button>
+          </div>
+          <p class="message" id="order-message" role="status"></p>
+        </div>
+        <p class="message" id="tracking-message" role="alert"></p>
+        <button class="secondary" id="finish-work" type="button" hidden style="width:100%;margin-top:10px">إنهاء العمل والوقف عن مشاركة الموقع</button>
+        <div class="foot"><span id="signed-in-email"></span><button class="danger" id="logout-button" type="button">تسجيل الخروج</button></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script>
+    window.firebaseConfig = {
+      adminUid: "EJzFMGkbFmSH1zCky7xngESYaEw2",
+      apiKey: "AIzaSyDtax-h0au2_Q-WtdwLIYVwxgQoVZLmKjY",
+      authDomain: "tesr-a9f90.firebaseapp.com",
+      databaseURL: "https://tesr-a9f90-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "tesr-a9f90",
+      storageBucket: "tesr-a9f90.firebasestorage.app",
+      messagingSenderId: "337525076350",
+      appId: "1:337525076350:web:1b1333920623c00723032f"
+    };
+  </script>
+  <script>
+    "use strict";
+
+    const loginForm = document.getElementById("login-form");
+    const loginButton = document.getElementById("login-button");
+    const trackingScreen = document.getElementById("tracking-screen");
+    const loginMessage = document.getElementById("login-message");
+    const trackingMessage = document.getElementById("tracking-message");
+    const locationMessage = document.getElementById("location-message");
+
+    let activeUser = null;
+    let driverUid = null;
+    let driverAuth = null;
+    let driverDatabase = null;
+    let driverTimestamp = null;
+    let driverRef = null;
+    let locationWatchId = null;
+    let heartbeatId = null;
+    let profile = null;
+    let updateInProgress = false;
+    let workStarted = false;
+    let nativeLocationWatcherId = null;
+    let screenWakeLock = null;
+    let silentAudio = null;
+
+    async function hashPassword(password) {
+      const bytes = new TextEncoder().encode(password);
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    function enableBackgroundMode() {
+      try {
+        if (!silentAudio) {
+          silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
+          silentAudio.loop = true;
+        }
+        silentAudio.play().catch(() => {});
+      } catch (_) {}
+    }
+
+    function disableBackgroundMode() {
+      if (silentAudio) {
+        silentAudio.pause();
+        silentAudio = null;
+      }
+    }
+
+    async function keepScreenAwake() {
+      if (!("wakeLock" in navigator) || document.visibilityState !== "visible") return;
+      try {
+        screenWakeLock = await navigator.wakeLock.request("screen");
+        screenWakeLock.addEventListener("release", () => { screenWakeLock = null; });
+      } catch (_) {}
+    }
+
+    async function releaseScreenWakeLock() {
+      if (!screenWakeLock) return;
+      await screenWakeLock.release().catch(() => {});
+      screenWakeLock = null;
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && workStarted) keepScreenAwake();
+    });
+
+    async function loadDriverDirectory() {
+      const usernameSelect = loginForm.elements.username;
+      usernameSelect.disabled = true;
+      loginButton.disabled = true;
+      loginMessage.textContent = "";
+      try {
+        const snapshot = await driverDatabase.ref("driverDirectory").once("value");
+        const entries = [];
+        snapshot.forEach(child => {
+          const driver = child.val();
+          if (driver && typeof driver.name === "string" && driver.name.trim() &&
+              typeof driver.username === "string") {
+            entries.push({ name: driver.name.trim(), username: driver.username });
           }
-        </style>
-      </head>
-      <body>
-        <main class="page">
-          <section class="card">
-            <div class="brand"><div class="brand-mark" aria-hidden="true">ط</div><div class="brand-name">طيّار<span>تطبيق فريق التوصيل</span></div></div>
-            <form class="form" id="login-form">
-              <h1>دخول الطيار</h1>
-              <p class="intro">استخدم اسم المستخدم وكلمة المرور اللذين أعطاهما لك المدير.</p>
-              <p class="message" id="local-file-warning" role="alert" hidden>أنت تفتح نسخة من ملفات الجهاز؛ تسجيل الدخول قد لا يعمل أو لا يُحفظ. استخدم <a href="https://tesr-a9f90.web.app/driver.html">صفحة الطيار المنشورة</a>.</p>
-              <div class="field">
-                <label for="username">اختر اسم الطيار</label>
-                <select id="username" name="username" autocomplete="username" required disabled>
-                  <option value="">جارٍ تحميل قائمة الطيارين...</option>
-                </select>
-                <small class="field-hint">اختر اسمك من القائمة، ثم اكتب كلمة المرور التي أعطاها لك المدير.</small>
-              </div>
-              <div class="field"><label for="password">كلمة المرور</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
-              <button class="primary" id="login-button" type="submit">تسجيل الدخول</button>
-              <p class="message" id="login-message" role="alert"></p>
-              <p class="info">بعد تسجيل الدخول اضغط «بدء العمل» واسمح للمتصفح باستخدام الموقع. يراه المدير فقط، ويتوقف التحديث عند إنهاء العمل أو إغلاق الصفحة.</p>
-            </form>
+        });
+        entries.sort((a, b) => a.name.localeCompare(b.name, "ar"));
+        usernameSelect.replaceChildren();
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = entries.length ? "اختر اسم الطيار" : "لا توجد حسابات طيارين";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        usernameSelect.append(placeholder);
+        entries.forEach(entry => {
+          const option = document.createElement("option");
+          option.value = entry.username;
+          option.textContent = entry.name;
+          usernameSelect.append(option);
+        });
+        usernameSelect.disabled = entries.length === 0;
+        loginButton.disabled = entries.length === 0;
+      } catch (error) {
+        loginMessage.textContent = `تعذر تحميل أسماء الطيارين (${error.code || error.message}).`;
+      }
+    }
 
-            <section id="tracking-screen" hidden>
-              <h1 id="welcome">مرحبًا</h1>
-              <p class="intro">يُشارك موقعك مع المدير فقط أثناء بقاء التطبيق مفتوحًا.</p>
-              <div class="status-card"><span class="dot" id="online-dot"></span><span class="status-copy"><strong id="online-label">جارٍ الاتصال...</strong><small id="connection-detail">لا تغلق هذه الصفحة أثناء العمل.</small></span></div>
-              <button class="primary start-work" id="start-work" type="button">بدء العمل ومشاركة موقعي</button>
-              <p class="message" id="work-message" role="status"></p>
-              <div class="location" id="location-message" aria-live="polite">بانتظار الموقع...</div>
-              <div class="order-section">
-                <div class="field"><label for="active-order">رقم الطلب</label><input id="active-order" type="text" maxlength="80" autocomplete="off"></div>
-                <div class="button-row">
-                  <button class="secondary" id="start-order" type="button">بدء / تحديث الطلب</button>
-                  <button class="secondary" id="finish-order" type="button">تم تسليم الطلب</button>
-                </div>
-                <p class="message" id="order-message" role="status"></p>
-              </div>
-              <p class="message" id="tracking-message" role="alert"></p>
-              <div class="foot"><span id="signed-in-email"></span><button class="danger" id="logout-button" type="button">تسجيل الخروج</button></div>
-            </section>
-          </section>
-        </main>
-        <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-        <script src="firebase-config.js"></script>
-        <script>
-          "use strict";
+    function showAuthError(error) {
+      const messages = {
+        "auth/wrong-password": "كلمة المرور غير صحيحة.",
+        "auth/user-not-found": "اسم المستخدم غير موجود.",
+        "auth/network-request-failed": "تحقق من اتصال الإنترنت."
+      };
+      return messages[error.code] || `تعذر تسجيل الدخول (${error.code || error.message || "خطأ"}).`;
+    }
 
-          const loginForm = document.getElementById("login-form");
-          const loginButton = document.getElementById("login-button");
-          const trackingScreen = document.getElementById("tracking-screen");
-          const loginMessage = document.getElementById("login-message");
-          const trackingMessage = document.getElementById("tracking-message");
-          const locationMessage = document.getElementById("location-message");
-          let activeUser = null;
-          let driverAuth = null;
-          let driverDatabase = null;
-          let driverTimestamp = null;
-          let driverRef = null;
-          let connectedRef = null;
-          let connectedCallback = null;
-          let locationWatchId = null;
-          let heartbeatId = null;
-          let profile = null;
-          let connected = false;
-          let updateInProgress = false;
-          let workStarted = false;
+    function setOnlineDisplay(isOnline, detail, statusLabel = "لم يبدأ العمل") {
+      document.getElementById("online-dot").classList.toggle("online", isOnline);
+      document.getElementById("online-label").textContent = isOnline ? "أنت متصل بالتطبيق" : statusLabel;
+      document.getElementById("connection-detail").textContent = detail;
+    }
 
-          async function loadDriverDirectory() {
-            const usernameSelect = loginForm.elements.username;
-            usernameSelect.disabled = true;
-            loginButton.disabled = true;
-            loginMessage.textContent = "";
-            let timeoutId;
-            try {
-              const snapshot = await Promise.race([
-                driverDatabase.ref("driverDirectory").once("value"),
-                new Promise((_, reject) => {
-                  timeoutId = window.setTimeout(
-                    () => reject({ code: "database/timeout" }),
-                    15000
-                  );
-                })
-              ]);
-              const entries = [];
-              snapshot.forEach(child => {
-                const driver = child.val();
-                if (driver && typeof driver.name === "string" && driver.name.trim() &&
-                    typeof driver.username === "string" && /^[a-z0-9][a-z0-9._-]{2,19}$/.test(driver.username)) {
-                  entries.push({ name: driver.name.trim(), username: driver.username });
-                }
-              });
-              entries.sort((left, right) => left.name.localeCompare(right.name, "ar"));
-              usernameSelect.replaceChildren();
-              const placeholder = document.createElement("option");
-              placeholder.value = "";
-              placeholder.textContent = entries.length ? "اختر اسم الطيار" : "لا توجد حسابات طيارين";
-              placeholder.disabled = true;
-              placeholder.selected = true;
-              usernameSelect.append(placeholder);
-              entries.forEach(entry => {
-                const option = document.createElement("option");
-                option.value = entry.username;
-                option.textContent = entry.name;
-                usernameSelect.append(option);
-              });
-              usernameSelect.disabled = entries.length === 0;
-              loginButton.disabled = entries.length === 0;
-              if (!entries.length) {
-                loginMessage.textContent = "لا توجد أسماء طيارين متاحة. اطلب من المدير فتح لوحة الإدارة مرة واحدة لمزامنة القائمة.";
-              }
-            } catch (error) {
-              usernameSelect.replaceChildren();
-              const option = document.createElement("option");
-              option.value = "";
-              option.textContent = "تعذر تحميل قائمة الطيارين";
-              option.disabled = true;
-              option.selected = true;
-              usernameSelect.append(option);
-              loginMessage.textContent = `تعذر تحميل أسماء الطيارين (${error.code || error.message}). تحقق من اتصال الإنترنت وقواعد Firebase.`;
-            } finally {
-              window.clearTimeout(timeoutId);
-            }
-          }
+    function saveLocation(position) {
+      if (!driverRef || updateInProgress || !workStarted) return;
+      updateInProgress = true;
+      const coords = position.coords;
+      driverRef.update({
+        lat: coords.latitude,
+        lng: coords.longitude,
+        accuracy: coords.accuracy,
+        locationUpdatedAt: driverTimestamp,
+        updatedAt: driverTimestamp,
+        online: true
+      }).then(() => {
+        locationMessage.textContent = `موقعك محدث. دقة الموقع: ${Math.round(coords.accuracy)} متر.`;
+        setOnlineDisplay(true, "آخر تحديث للموقع الآن.");
+      }).catch(error => {
+        trackingMessage.textContent = `تعذر إرسال الموقع: ${error.message || error.code}.`;
+      }).finally(() => {
+        updateInProgress = false;
+      });
+    }
 
-          function showAuthError(error) {
-            const messages = {
-              "auth/invalid-credential": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
-              "auth/invalid-login-credentials": "اسم المستخدم أو كلمة المرور غير صحيحة.",
-              "auth/invalid-email": "اسم المستخدم أو كلمة المرور غير صحيحة.",
-              "auth/user-not-found": "لا يوجد حساب بهذا البريد الإلكتروني.",
-              "auth/wrong-password": "كلمة المرور غير صحيحة.",
-              "auth/user-disabled": "تم إيقاف هذا الحساب. اطلب من المدير مراجعته.",
-              "auth/operation-not-allowed": "تسجيل البريد وكلمة المرور غير مفعّل في Firebase Authentication.",
-              "auth/too-many-requests": "محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.",
-              "auth/network-request-failed": "تعذّر الاتصال بخدمة تسجيل الدخول. تحقق من الإنترنت وافتح صفحة الطيار المنشورة عبر HTTPS.",
-              "auth/timeout": "انتهت مهلة تسجيل الدخول بعد 20 ثانية. تحقق من الإنترنت أو جرّب شبكة أخرى.",
-              "auth/internal-timeout": "تأخر رد Firebase Authentication. تحقق من الإنترنت وحاول مجددًا."
-            };
-            return messages[error.code] || `تعذر تسجيل الدخول (${error.code || "خطأ غير معروف"}). تحقق من إعدادات Firebase.`;
-          }
+    function handleLocationError(error) {
+      const messages = {
+        1: "لم تسمح بمشاركة الموقع. فعّل إذن الموقع من المتصفح.",
+        2: "تعذر تحديد موقعك. فعّل GPS في الهاتف.",
+        3: "تأخر تحديد الموقع. سيحاول تلقائيًا."
+      };
+      locationMessage.textContent = messages[error.code] || "تعذر تحديد الموقع.";
+    }
 
-          function setOnlineDisplay(isOnline, detail, statusLabel = "لم يبدأ العمل") {
-            document.getElementById("online-dot").classList.toggle("online", isOnline);
-            document.getElementById("online-label").textContent = isOnline ? "أنت متصل بالتطبيق" : statusLabel;
-            document.getElementById("connection-detail").textContent = detail;
-          }
+    async function beginTracking(user) {
+      loginForm.hidden = true;
+      trackingScreen.hidden = false;
+      trackingMessage.textContent = "";
 
-          function saveLocation(position) {
-            if (!driverRef || !connected || updateInProgress) return;
-            updateInProgress = true;
-            const coords = position.coords;
-            driverRef.update({
-              lat: coords.latitude,
-              lng: coords.longitude,
-              accuracy: coords.accuracy,
-              locationUpdatedAt: driverTimestamp,
-              updatedAt: driverTimestamp,
-              online: true
-            }).then(() => {
-              locationMessage.textContent = `موقعك محدث. دقة الموقع التقريبية ${Math.round(coords.accuracy)} متر.`;
-              setOnlineDisplay(true, "آخر تحديث للموقع الآن.");
-            }).catch(error => {
-              trackingMessage.textContent = `تعذر إرسال الموقع: ${error.message || error.code}. تحقق من قواعد Realtime Database.`;
-            }).finally(() => {
-              updateInProgress = false;
-            });
-          }
+      const sessionSnapshot = await driverDatabase.ref(`driverSessions/${user.uid}`).once("value");
+      const mappedUid = sessionSnapshot.val();
+      if (!mappedUid) return;
 
-          function handleLocationError(error) {
-            const messages = {
-              1: "لم تسمح بمشاركة الموقع. فعّل إذن الموقع من إعدادات المتصفح ليظهر موقعك للمدير.",
-              2: "تعذر تحديد موقعك. فعّل GPS وتأكد من إعدادات الموقع في الهاتف.",
-              3: "تأخر تحديد الموقع. سيحاول التطبيق مرة أخرى تلقائيًا."
-            };
-            locationMessage.textContent = messages[error.code] || "تعذر تحديد الموقع. تحقق من إعدادات الجهاز.";
-          }
+      driverUid = mappedUid;
+      driverRef = driverDatabase.ref(`drivers/${mappedUid}`);
+      
+      const snapshot = await driverRef.once("value");
+      const existing = snapshot.val() || {};
 
-          async function beginTracking(user) {
-            loginForm.hidden = true;
-            trackingScreen.hidden = false;
-            trackingMessage.textContent = "";
-            document.getElementById("signed-in-email").textContent = user.email || "";
-            driverRef = driverDatabase.ref(`drivers/${user.uid}`);
-            let existing = {};
-            let profileReadTimeout;
-            try {
-              const snapshot = await Promise.race([
-                driverRef.once("value"),
-                new Promise((_, reject) => {
-                  profileReadTimeout = window.setTimeout(
-                    () => reject({ code: "database/timeout" }),
-                    15000
-                  );
-                })
-              ]);
-              existing = snapshot.val() || {};
-            } catch (error) {
-              const reason = error.code === "database/timeout"
-                ? "انتهت مهلة الاتصال"
-                : error.code || error.message;
-              trackingMessage.textContent = `تم تسجيل الدخول، لكن تعذر تحميل سجل الطيار من قاعدة البيانات (${reason}). تحقق من اتصال الإنترنت وقواعد قاعدة البيانات، ثم أعد تحميل الصفحة.`;
-              return;
-            } finally {
-              window.clearTimeout(profileReadTimeout);
-            }
+      profile = {
+        name: existing.name || "طيار",
+        orderId: existing.orderId || "",
+        status: existing.status || "waiting"
+      };
 
-            profile = {
-              name: existing.name || user.displayName || "طيار",
-              orderId: existing.orderId || "",
-              status: existing.status || "waiting"
-            };
-            const email = (user.email || "").toLowerCase();
-            const accountDomain = `@drivers.${firebaseConfig.projectId}.firebaseapp.com`;
-            const signedInUsername = email.endsWith(accountDomain) ? email.slice(0, -accountDomain.length) : null;
-            if (!existing.name || !existing.username || (signedInUsername !== null && existing.username !== signedInUsername)) {
-              loginMessage.textContent = "بيانات الدخول غير مرتبطة بحساب طيار. اطلب من المدير إنشاء الحساب من لوحة الإدارة.";
+      activeUser = user;
+      document.getElementById("welcome").textContent = `مرحبًا ${profile.name}`;
+      document.getElementById("active-order").value = profile.orderId;
+
+      if (localStorage.getItem("driver_is_working") === "true") {
+        startWork();
+      } else {
+        document.getElementById("start-work").hidden = false;
+        document.getElementById("finish-work").hidden = true;
+        setOnlineDisplay(false, "اضغط «بدء العمل» عندما تبدأ دوامك.");
+      }
+    }
+
+    async function startNativeTracking() {
+      const plugin = window.Capacitor?.Plugins?.BackgroundGeolocation;
+      if (!plugin) return false;
+      nativeLocationWatcherId = await plugin.addWatcher({
+        backgroundMessage: "يشارك تطبيق الطيار موقعه مع الإدارة",
+        backgroundTitle: "الطيار يعمل",
+        requestPermissions: true,
+        stale: false
+      }, (location, error) => {
+        if (error || !location) return;
+        saveLocation({ coords: {
+          latitude: location.latitude,
+          longitude: location.longitude,
+          accuracy: location.accuracy || 0
+        }});
+      });
+      return true;
+    }
+
+    async function stopNativeTracking() {
+      const plugin = window.Capacitor?.Plugins?.BackgroundGeolocation;
+      if (plugin && nativeLocationWatcherId) {
+        await plugin.removeWatcher({ id: nativeLocationWatcherId }).catch(() => {});
+      }
+      nativeLocationWatcherId = null;
+    }
+
+    async function startWork() {
+      if (!driverRef || !profile || workStarted) return;
+      workStarted = true;
+      localStorage.setItem("driver_is_working", "true");
+
+      keepScreenAwake();
+      enableBackgroundMode();
+
+      document.getElementById("start-work").hidden = true;
+      document.getElementById("finish-work").hidden = false;
+      document.getElementById("work-message").textContent = "تم بدء العمل ومشاركة موقعك جارية الآن.";
+
+      try {
+        await driverRef.update({
+          name: profile.name,
+          orderId: profile.orderId || "",
+          status: profile.status || "waiting",
+          online: true,
+          updatedAt: driverTimestamp
+        });
+        setOnlineDisplay(true, "متصل - موقعك يشارك الآن مباشرة مع الإدارة.");
+      } catch (error) {
+        trackingMessage.textContent = `تعذر تفعيل الحضور: ${error.message || error.code}.`;
+      }
+
+      if (await startNativeTracking()) {
+        locationMessage.textContent = "تتم مشاركة موقعك بنجاح.";
+      } else if (navigator.geolocation && locationWatchId === null) {
+        locationWatchId = navigator.geolocation.watchPosition(saveLocation, handleLocationError, {
+          enableHighAccuracy: true,
+          maximumAge: 5000,
+          timeout: 20000
+        });
+      }
+
+      if (heartbeatId !== null) clearInterval(heartbeatId);
+      heartbeatId = window.setInterval(() => {
+        if (!driverRef || !workStarted) return;
+        driverRef.update({
+          online: true,
+          updatedAt: driverTimestamp
+        }).catch(() => {});
+      }, 20000);
+    }
+
+    async function finishWork() {
+      if (!workStarted) return;
+
+      localStorage.removeItem("driver_is_working");
+
+      if (locationWatchId !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(locationWatchId);
+        locationWatchId = null;
+      }
+
+      if (heartbeatId !== null) {
+        window.clearInterval(heartbeatId);
+        heartbeatId = null;
+      }
+
+      await stopNativeTracking();
+      await releaseScreenWakeLock();
+      disableBackgroundMode();
+
+      if (driverRef) {
+        try {
+          await driverRef.update({
+            online: false,
+            status: "waiting",
+            updatedAt: driverTimestamp
+          });
+        } catch (_) {}
+      }
+
+      workStarted = false;
+      setOnlineDisplay(false, "اضغط «بدء العمل» عندما تبدأ دوامك.", "تم إنهاء العمل");
+      document.getElementById("location-message").textContent = "تم إيقاف مشاركة الموقع.";
+      document.getElementById("start-work").hidden = false;
+      document.getElementById("finish-work").hidden = true;
+      document.getElementById("work-message").textContent = "تم إنهاء العمل وإيقاف التتبع بنجاح.";
+    }
+
+    document.getElementById("start-work").addEventListener("click", startWork);
+    document.getElementById("finish-work").addEventListener("click", finishWork);
+
+    loginForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const username = loginForm.elements.username.value;
+      if (!username) {
+        loginMessage.textContent = "اختر اسم الطيار من القائمة.";
+        return;
+      }
+      loginButton.disabled = true;
+      loginButton.textContent = "جارٍ التحقق...";
+      loginMessage.textContent = "";
+
+      try {
+        await driverAuth.signInAnonymously();
+        const credentialSnapshot = await driverDatabase.ref("driverCredentials").orderByChild("username").equalTo(username).once("value");
+        let credentials = null;
+        credentialSnapshot.forEach(child => { credentials = { uid: child.key, ...child.val() }; });
+        
+        const passwordHash = await hashPassword(loginForm.elements.password.value);
+        if (!credentials || credentials.passwordHash !== passwordHash) {
+          await driverAuth.signOut();
+          throw { code: "auth/wrong-password" };
+        }
+        driverUid = credentials.uid;
+        await driverDatabase.ref(`driverSessions/${driverAuth.currentUser.uid}`).set(driverUid);
+        if (!driverRef) await beginTracking(driverAuth.currentUser);
+      } catch (error) {
+        loginMessage.textContent = showAuthError(error);
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "تسجيل الدخول";
+      }
+    });
+
+    document.getElementById("start-order").addEventListener("click", async () => {
+      if (!driverRef || !profile) return;
+      profile.orderId = document.getElementById("active-order").value.trim();
+      profile.status = profile.orderId ? "progress" : "waiting";
+      const now = Date.now();
+      try {
+        await driverRef.update({ 
+          name: profile.name, 
+          orderId: profile.orderId, 
+          status: profile.status, 
+          orderStartedAt: profile.orderId ? now : null,
+          updatedAt: driverTimestamp 
+        });
+        profile.orderStartedAt = profile.orderId ? now : null;
+        document.getElementById("order-message").textContent = profile.orderId ? "تم تحديث الطلب وبدء التوصيل." : "تم تسجيلك كمتاح دون طلب.";
+      } catch (error) {
+        document.getElementById("order-message").textContent = `تعذر تحديث الطلب: ${error.message || error.code}.`;
+      }
+    });
+
+    document.getElementById("finish-order").addEventListener("click", async () => {
+      if (!driverRef || !profile || !profile.orderId) {
+        document.getElementById("order-message").textContent = "اكتب رقم الطلب أولًا.";
+        return;
+      }
+      
+      const deliveredOrderId = profile.orderId;
+      const finishBtn = document.getElementById("finish-order");
+      finishBtn.disabled = true;
+
+      try {
+        const completedAt = Date.now();
+        const startedAt = profile.orderStartedAt || completedAt;
+        const durationMinutes = Math.max(1, Math.round((completedAt - startedAt) / 60000));
+        
+        await driverDatabase.ref(`orderDeliveries/${driverUid}`).push({
+          orderId: deliveredOrderId,
+          driverName: profile.name,
+          driverUsername: profile.username || "",
+          startedAt: startedAt,
+          deliveredAt: completedAt,
+          durationMinutes: durationMinutes,
+          isLate: durationMinutes > 45
+        });
+
+        await driverRef.update({ 
+          status: "waiting",
+          orderId: "",
+          orderStartedAt: null,
+          lastOrderDuration: durationMinutes,
+          updatedAt: completedAt 
+        });
+
+        profile.orderId = "";
+        profile.status = "waiting";
+        profile.orderStartedAt = null;
+
+        document.getElementById("active-order").value = "";
+        document.getElementById("order-message").style.color = "#16875d";
+        document.getElementById("order-message").textContent = `تم تسليم الطلب (${deliveredOrderId}) في ${durationMinutes} دقيقة.`;
+      } catch (error) {
+        document.getElementById("order-message").style.color = "#a33b2c";
+        document.getElementById("order-message").textContent = `تعذر تسجيل التسليم: ${error.message || error.code}.`;
+      } finally {
+        finishBtn.disabled = false;
+      }
+    });
+
+    async function stopTracking() {
+      await finishWork();
+      driverRef = null;
+      activeUser = null;
+    }
+
+    document.getElementById("logout-button").addEventListener("click", async () => {
+      await stopTracking();
+      try {
+        await driverAuth.signOut();
+        trackingScreen.hidden = true;
+        loginForm.hidden = false;
+      } catch (error) {
+        trackingMessage.textContent = `تعذر تسجيل الخروج: ${error.message || error.code}.`;
+      }
+    });
+
+    if (window.firebase && window.firebaseConfig && firebaseConfig.databaseURL) {
+      try {
+        const appName = "driverPortal";
+        const app = firebase.apps.find(e => e.name === appName) || firebase.initializeApp(firebaseConfig, appName);
+        driverAuth = app.auth();
+        driverDatabase = app.database();
+        driverTimestamp = firebase.database.ServerValue.TIMESTAMP;
+        
+        driverAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+          driverAuth.onAuthStateChanged(user => {
+            if (user && !driverRef) beginTracking(user);
+            if (!user) {
               trackingScreen.hidden = true;
               loginForm.hidden = false;
-              driverRef = null;
-              await driverAuth.signOut();
-              return;
-            }
-            activeUser = user;
-            document.getElementById("welcome").textContent = `مرحبًا ${profile.name}`;
-            document.getElementById("active-order").value = profile.orderId;
-            document.getElementById("start-work").hidden = false;
-            setOnlineDisplay(false, "اضغط «بدء العمل» عندما تبدأ دوامك.");
-          }
-
-          async function startWork() {
-            if (!driverRef || !profile || workStarted) return;
-            workStarted = true;
-            document.getElementById("start-work").disabled = true;
-            document.getElementById("work-message").textContent = "";
-            connectedRef = driverDatabase.ref(".info/connected");
-            connectedCallback = connectedRef.on("value", async snapshot => {
-              connected = snapshot.val() === true;
-              if (!connected) {
-                setOnlineDisplay(false, "بانتظار اتصال آمن بقاعدة البيانات...", "جارٍ الاتصال بقاعدة البيانات...");
-                return;
-              }
-              try {
-                await driverRef.child("online").onDisconnect().set(false);
-                await driverRef.update({
-                  name: profile.name,
-                  orderId: profile.orderId,
-                  status: profile.status,
-                  online: true,
-                  updatedAt: driverTimestamp
-                });
-                setOnlineDisplay(true, "جارٍ الحصول على إذن الموقع... اترك الصفحة مفتوحة أثناء العمل.");
-              } catch (error) {
-                trackingMessage.textContent = `تعذر تفعيل الحضور: ${error.message || error.code}. راجع قواعد Firebase.`;
-                return;
-              }
-              if (!navigator.geolocation) {
-                locationMessage.textContent = "هذا المتصفح لا يدعم مشاركة الموقع. افتح الصفحة على هاتف حديث.";
-                return;
-              }
-              if (locationWatchId === null) {
-                locationWatchId = navigator.geolocation.watchPosition(saveLocation, handleLocationError, {
-                  enableHighAccuracy: true,
-                  maximumAge: 5000,
-                  timeout: 20000
-                });
-              }
-            }, error => {
-              trackingMessage.textContent = `تعذر الاتصال بقاعدة البيانات: ${error.message || error.code}.`;
-            });
-
-            heartbeatId = window.setInterval(() => {
-              if (!connected || !driverRef) return;
-              const update = {
-                online: true,
-                updatedAt: driverTimestamp
-              };
-              driverRef.update(update).catch(error => {
-                trackingMessage.textContent = `تعذر تحديث حالة الاتصال: ${error.message || error.code}.`;
-              });
-            }, 20000);
-          }
-          document.getElementById("start-work").addEventListener("click", startWork);
-
-          loginForm.addEventListener("submit", async event => {
-            event.preventDefault();
-            const username = loginForm.elements.username.value;
-            if (!username) {
-              loginMessage.textContent = "اختر اسم الطيار من القائمة.";
-              return;
-            }
-            const email = `${username}@drivers.${firebaseConfig.projectId}.firebaseapp.com`;
-            loginButton.disabled = true;
-            loginButton.textContent = "جارٍ التحقق...";
-            loginMessage.textContent = "";
-            let loginTimeout;
-            try {
-              await Promise.race([
-                driverAuth.signInWithEmailAndPassword(email, loginForm.elements.password.value),
-                new Promise((_, reject) => {
-                  loginTimeout = window.setTimeout(
-                    () => reject({ code: "auth/timeout" }),
-                    20000
-                  );
-                })
-              ]);
-            } catch (error) {
-              loginMessage.textContent = showAuthError(error);
-            } finally {
-              window.clearTimeout(loginTimeout);
-              loginButton.disabled = false;
-              loginButton.textContent = "تسجيل الدخول";
             }
           });
-
-          document.getElementById("start-order").addEventListener("click", async () => {
-            if (!driverRef || !profile) return;
-            profile.orderId = document.getElementById("active-order").value.trim();
-            profile.status = profile.orderId ? "progress" : "waiting";
-            try {
-              await driverRef.update({ name: profile.name, orderId: profile.orderId, status: profile.status, updatedAt: driverTimestamp });
-              document.getElementById("order-message").textContent = profile.orderId ? "تم تحديث الطلب وبدء التوصيل." : "تم تسجيلك كمتاح دون طلب.";
-            } catch (error) {
-              document.getElementById("order-message").textContent = `تعذر تحديث الطلب: ${error.message || error.code}.`;
-            }
-          });
-
-          document.getElementById("finish-order").addEventListener("click", async () => {
-            if (!driverRef || !profile || !profile.orderId) {
-              document.getElementById("order-message").textContent = "اكتب رقم الطلب أولًا.";
-              return;
-            }
-            try {
-              await driverRef.update({ status: "delivered", updatedAt: driverTimestamp });
-              profile.status = "delivered";
-              document.getElementById("order-message").textContent = `تم تسجيل تسليم الطلب ${profile.orderId}.`;
-            } catch (error) {
-              document.getElementById("order-message").textContent = `تعذر تحديث حالة الطلب: ${error.message || error.code}.`;
-            }
-          });
-
-          async function stopTracking() {
-            if (locationWatchId !== null && navigator.geolocation) navigator.geolocation.clearWatch(locationWatchId);
-            locationWatchId = null;
-            if (heartbeatId !== null) window.clearInterval(heartbeatId);
-            heartbeatId = null;
-            if (connectedRef && connectedCallback) connectedRef.off("value", connectedCallback);
-            connectedRef = null;
-            connectedCallback = null;
-            connected = false;
-            if (driverRef) {
-              try {
-                await driverRef.child("online").onDisconnect().cancel();
-                await driverRef.update({ online: false, updatedAt: driverTimestamp });
-              } catch (error) {
-                trackingMessage.textContent = `تعذر تسجيل الخروج من حالة الاتصال: ${error.message || error.code}.`;
-              }
-            }
-            driverRef = null;
-            activeUser = null;
-            workStarted = false;
-            document.getElementById("start-work").disabled = false;
-          }
-
-          document.getElementById("logout-button").addEventListener("click", async () => {
-            await stopTracking();
-            try {
-              await driverAuth.signOut();
-              trackingScreen.hidden = true;
-              loginForm.hidden = false;
-              document.getElementById("order-message").textContent = "";
-              document.getElementById("work-message").textContent = "";
-            } catch (error) {
-              trackingMessage.textContent = `تعذر تسجيل الخروج: ${error.message || error.code}.`;
-            }
-          });
-
-          if (!window.firebase || !window.firebaseConfig || !firebaseConfig.databaseURL) {
-            loginButton.disabled = true;
-            loginMessage.textContent = "أضف databaseURL من إعدادات Realtime Database إلى firebase-config.js.";
-          } else if (window.location.protocol === "file:") {
-            loginButton.disabled = true;
-            document.getElementById("local-file-warning").hidden = false;
-          } else {
-            try {
-              const appName = "driverPortal";
-              const app = firebase.apps.find(existingApp => existingApp.name === appName)
-                || firebase.initializeApp(firebaseConfig, appName);
-              driverAuth = app.auth();
-              driverDatabase = app.database();
-              driverTimestamp = firebase.database.ServerValue.TIMESTAMP;
-              loginButton.disabled = true;
-              driverAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
-                loginButton.disabled = false;
-                driverAuth.onAuthStateChanged(user => {
-                  if (user && !driverRef) beginTracking(user);
-                  if (!user) {
-                    if (activeUser) stopTracking();
-                    trackingScreen.hidden = true;
-                    loginForm.hidden = false;
-                  }
-                });
-                loadDriverDirectory();
-              }).catch(error => {
-                loginMessage.textContent = `تعذر حفظ جلسة الدخول (${error.code || error.message}). افتح الموقع من HTTPS وتحقق من إعدادات ملفات الارتباط.`;
-              });
-            } catch (error) {
-              loginButton.disabled = true;
-              loginMessage.textContent = `تعذر تشغيل Firebase: ${error.message}.`;
-            }
-          }
-        </script>
-      </body>
-      </html>
+          loadDriverDirectory();
+        });
+      } catch (error) {
+        loginMessage.textContent = `تعذر تشغيل Firebase: ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
